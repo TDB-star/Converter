@@ -1,11 +1,5 @@
-//
-//  ContentView.swift
-//  Converter
-//
-//  Created by Tatiana Dmitrieva on 26/11/2025.
-//
-
 import SwiftUI
+import TipKit
 
 struct ContentView: View {
     
@@ -19,8 +13,11 @@ struct ContentView: View {
     @State var leftCurrency: Currency = .silverPenny
     @State var rightCurrency: Currency = .goldPiece
     
+    let currencyTip = CurrencyTip()
+    
     var body: some View {
         ZStack {
+            //background image
             Image(.background)
                 .resizable()
                 .ignoresSafeArea()
@@ -49,7 +46,9 @@ struct ContentView: View {
                         .padding(.bottom, -5)
                         .onTapGesture {
                             showSelectCurrency.toggle()
+                            currencyTip.invalidate(reason: .actionPerformed)
                         }
+                        .popoverTip(currencyTip, arrowEdge: .bottom)
                         // Text field
                         TextField("Amount", text: $leftAmount)
                             .textFieldStyle(.roundedBorder)
@@ -84,6 +83,7 @@ struct ContentView: View {
                         .padding(.bottom, -5)
                         .onTapGesture {
                             showSelectCurrency.toggle()
+                            currencyTip.invalidate(reason: .actionPerformed)
                         }
                         
                         TextField("Amount", text: $rightAmount)
@@ -101,37 +101,46 @@ struct ContentView: View {
                                     rightAmount, to: leftCurrency)
                             }
                     }
+                    .task {
+                        try? Tips.configure()
+                    }
                     
-                    .padding()
-                    .background(.black.opacity(0.5))
+                    //.padding()
                     .keyboardType(.decimalPad)
                     
-                    
+                }
+                           //.border(.blue)
+                .padding()
+                .background(.black.opacity(0.5))
+                
+                Spacer()
+                HStack {
                     Spacer()
-                    HStack {
-                        Spacer()
-                        Button {
-                            showExchangeInfo.toggle()
-                            
-                        } label: {
-                            Image(systemName: "info.circle.fill")
-                                .font(.largeTitle)
-                                .foregroundStyle(.white)
-                        }
-                        .padding(.trailing)
-                        .sheet(isPresented: $showExchangeInfo) {
-                            ExchangeInfoView()
-                        }
-                        .sheet(isPresented: $showSelectCurrency) {
-                            SelectCurrencyView(
-                                topCurrency: $leftCurrency,
-                                bottomCurrency: $rightCurrency
-                            )
-                        }
+                    Button {
+                        showExchangeInfo.toggle()
+                        
+                    } label: {
+                        Image(systemName: "info.circle.fill")
+                            .font(.largeTitle)
+                            .foregroundStyle(.white)
+                    }
+                    .padding(.trailing)
+                    .sheet(isPresented: $showExchangeInfo) {
+                        ExchangeInfoView()
+                    }
+                    .sheet(isPresented: $showSelectCurrency) {
+                        SelectCurrencyView(
+                            topCurrency: $leftCurrency,
+                            bottomCurrency: $rightCurrency
+                        )
                     }
                 }
-                           .border(.blue)
+            
             }
+       
         }
     }
 }
+//#Preview {
+//    ContentView(showExchangeInfo: false, showSelectCurrency: false, leftAmount: " ", rightAmount: "", leftTyping: false, rightTyping: " ", leftCurrency: .copperPenny, rightCurrency: .goldPenny)
+//}
